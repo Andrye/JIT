@@ -1,19 +1,28 @@
-exec: main.o tools.o mallocx.o compile.o
-	g++ -Wall -o exec main.o tools.o mallocx.o compile.o
+CXX ?= g++
+ASM ?= nasm
+CXXFLAGS = -Wall -std=c++0x -O2 -g -c
+ASMFLAGS = -O0 -felf64
+SOURCES = main.cpp mallocx.cpp compile.cpp tools.asm
+OBJECTS_ = $(SOURCES:.cpp=.o)
+OBJECTS = $(OBJECTS_:.asm=.o)
+EXECUTABLES = exec 
+
+exec: $(OBJECTS)
+	$(CXX) -o $@ $?
 
 main.o : main.cpp
-	g++ -Wall -std=c++0x -O2 -c main.cpp -o main.o
+	$(CXX) $(CXXFLAGS)  $? -o $@
 
 mallocx.o : mallocx.cpp
-	g++ -Wall -std=c++0x -O2 -c mallocx.cpp -o mallocx.o
+	$(CXX) $(CXXFLAGS)  $? -o $@
 
 compile.o : compile.cpp
-	g++ -Wall -std=c++0x -O2 -c compile.cpp -o compile.o
+	$(CXX) $(CXXFLAGS) $? -o $@
 
 tools.o : tools.asm
-	nasm tools.asm -O0 -felf64 -g -o tools.o
+	$(ASM) $? $(ASMFLAGS) -o $@
 
 .PHONY : clean
 
 clean :
-	rm -f *.o exec
+	rm -f $(OBJECTS) $(EXECUTABLES)
